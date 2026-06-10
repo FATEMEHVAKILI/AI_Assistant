@@ -1,5 +1,32 @@
 # Python & Virtual Environment
 __pycache__/
-*.pyc
-.venv/
+*.py[cod]
+*$py.class
 venv/
+.venv/
+env/
+
+# Environment Variables 
+.env
+.env.local
+.env.*.local
+
+# Databases (SQLite)
+*.db
+*.sqlite
+*.sqlite3
+ai_assistant.db
+
+# Vector Database (ChromaDB)
+chroma_db/
+
+# Logs
+logs/
+*.log
+
+# IDE & Editor Settings
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store

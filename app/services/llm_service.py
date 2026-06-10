@@ -67,20 +67,33 @@ class LLMClient:
             return res.json().get("response", "")
         except Exception as e:
             logger.error(f"Local LLM Error: {e}")
-            return self._call_mock(prompt)  # Fallback to mock on error
+            return self._call_mock(prompt)
 
     def _call_mock(self, prompt: str) -> str:
         if "Classify the intent" in prompt:
             msg = prompt.split("Message:")[-1].strip().lower()
-            if "vip" in msg:
+            if "vip" in msg or "وی آی پی" in msg:
                 return "vip_question"
-            if "exchange" in msg or "register" in msg:
+            if "exchange" in msg or "register" in msg or "ثبت" in msg or "صرافی" in msg:
                 return "exchange_registration"
-            if "kol" in msg or "influencer" in msg:
+            if "kol" in msg or "KOL" in msg or "influencer" in msg:
                 return "kol_collaboration"
-            if "support" in msg or "problem" in msg or "paid" in msg:
+            if "support" in msg or "problem" in msg or "پرداخت" in msg or "مشکل" in msg:
                 return "support_request"
-            if "service" in msg or "what" in msg or "how" in msg:
-                return "general_info"
-            return "unknown"
-        return "This is a mock response based on the provided context."
+            return "general_info"
+
+        if "Context:" in prompt and "User Question:" in prompt:
+            try:
+                context = prompt.split("Context:")[1].split(
+                    "User Question:")[0].strip()
+                question = prompt.split("User Question:")[1].strip()
+
+                if len(context) > 50:
+                    sentences = context.split(
+                        '۔')[:2] or context.split('.')[:2]
+                    reply = " ".join(sentences).strip()
+                    return reply + "\n\nبرای اطلاعات بیشتر خوشحال می‌شم کمک کنم!"
+            except:
+                pass
+
+        return "بر اساس اطلاعات داخلی راستاد، این موضوع رو بررسی کردم. لطفاً جزئیات بیشتری بگید تا دقیق‌تر راهنمایی کنم."

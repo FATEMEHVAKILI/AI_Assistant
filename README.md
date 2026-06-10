@@ -126,12 +126,12 @@ If `pytest` is not available globally, run it through the local virtual environm
 .\.venv\Scripts\python.exe -m pytest
 ```
 
-Current tests are in `tests/test_endpoints.py` and use FastAPI `TestClient`.
+Current tests are in `tests/test_endpoints.py` and use FastAPI `TestClient`. These are API-level tests: they call the FastAPI app directly, without starting Uvicorn or opening a real network port.
 
 Test coverage included:
 
-- `POST /message` with a valid message: verifies `200 OK`, detected intent, user segment, `needs_human_support`, and a non-empty reply.
-- `POST /message` with an empty message: verifies `400 Bad Request` and the validation error message.
+- `test_message_endpoint_returns_intent_and_reply`: sends a valid `POST /message` request with `What is VIP?` and verifies `200 OK`, intent `vip_question`, segment `vip_interest`, `needs_human_support=false`, and a non-empty assistant reply.
+- `test_empty_message_is_rejected`: sends `POST /message` with an empty message and verifies `400 Bad Request` with `Message cannot be empty`.
 
 The test setup uses `LLM_PROVIDER=mock`, a temporary SQLite database, a temporary ChromaDB directory, and a stubbed knowledge-base search result. This keeps tests fast, isolated, and runnable without real API keys.
 

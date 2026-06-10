@@ -9,15 +9,37 @@ class IntentService:
 
     def _rule_based_intent(self, message: str) -> str:
         msg_lower = message.lower()
-        if "vip" in msg_lower or "premium" in msg_lower:
+        if "vip" in msg_lower or "premium" in msg_lower or "وی آی پی" in msg_lower:
             return "vip_question"
-        if "exchange" in msg_lower or "register" in msg_lower or "sign up" in msg_lower:
+        if (
+            "exchange" in msg_lower
+            or "register" in msg_lower
+            or "sign up" in msg_lower
+            or "صرافی" in msg_lower
+            or "ثبت نام" in msg_lower
+            or "ثبت‌نام" in msg_lower
+        ):
             return "exchange_registration"
-        if "kol" in msg_lower or "influencer" in msg_lower:
+        if "kol" in msg_lower or "influencer" in msg_lower or "همکاری" in msg_lower:
             return "kol_collaboration"
-        if "support" in msg_lower or "problem" in msg_lower or "paid" in msg_lower or "subscription" in msg_lower:
+        if (
+            "support" in msg_lower
+            or "problem" in msg_lower
+            or "paid" in msg_lower
+            or "subscription" in msg_lower
+            or "مشکل" in msg_lower
+            or "پرداخت" in msg_lower
+            or "پشتیبانی" in msg_lower
+        ):
             return "support_request"
-        if "service" in msg_lower or "what" in msg_lower or "how" in msg_lower:
+        if (
+            "service" in msg_lower
+            or "what" in msg_lower
+            or "how" in msg_lower
+            or "چطور" in msg_lower
+            or "چگونه" in msg_lower
+            or "چیست" in msg_lower
+        ):
             return "general_info"
         return "unknown"
 

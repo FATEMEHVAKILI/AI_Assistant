@@ -45,10 +45,15 @@ def process_message(req: schemas.MessageRequest, request: Request, db: Session =
         # 4. Generate Reply (with LLM Error handling)
         try:
             reply = llm_client.generate_reply(req.message, kb_context)
+            if not reply or not reply.strip():
+                logger.warning(
+                    f"[{receive_time}] Empty LLM reply for user_id: {req.user_id}; using fallback reply")
+                reply = "سلام! پیام شما را دریافت کردم. لطفا کمی جزئیات بیشتر بفرمایید تا دقیق‌تر راهنمایی کنم."
+                needs_human = True
         except Exception as e:
             logger.error(
                 f"[{receive_time}] LLM/Mock error during reply generation for user_id: {req.user_id}: {e}")
-            reply = "I'm sorry, I am currently experiencing technical difficulties. Please contact support."
+            reply = "سلام! در حال حاضر برای پاسخ‌گویی با مشکل فنی روبه‌رو هستم. لطفا با پشتیبانی تماس بگیرید."
             needs_human = True
 
         # 5. Database Operations

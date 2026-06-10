@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 from datetime import datetime
 from .database import Base
 
+
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
@@ -10,8 +11,10 @@ class User(Base):
     name = Column(String, nullable=False)
     segment = Column(String, default="new_user")
     created_at = Column(DateTime, default=datetime.utcnow)
-    last_seen_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    last_seen_at = Column(DateTime, default=datetime.utcnow,
+                          onupdate=datetime.utcnow)
     messages = relationship("Message", back_populates="user")
+
 
 class Message(Base):
     __tablename__ = "messages"

@@ -2,17 +2,23 @@ import logging
 
 logger = logging.getLogger("ai_assistant")
 
+
 class IntentService:
     def __init__(self, llm_client):
         self.llm_client = llm_client
 
     def _rule_based_intent(self, message: str) -> str:
         msg_lower = message.lower()
-        if "vip" in msg_lower or "premium" in msg_lower: return "vip_question"
-        if "exchange" in msg_lower or "register" in msg_lower or "sign up" in msg_lower: return "exchange_registration"
-        if "kol" in msg_lower or "influencer" in msg_lower: return "kol_collaboration"
-        if "support" in msg_lower or "problem" in msg_lower or "paid" in msg_lower or "subscription" in msg_lower: return "support_request"
-        if "service" in msg_lower or "what" in msg_lower or "how" in msg_lower: return "general_info"
+        if "vip" in msg_lower or "premium" in msg_lower:
+            return "vip_question"
+        if "exchange" in msg_lower or "register" in msg_lower or "sign up" in msg_lower:
+            return "exchange_registration"
+        if "kol" in msg_lower or "influencer" in msg_lower:
+            return "kol_collaboration"
+        if "support" in msg_lower or "problem" in msg_lower or "paid" in msg_lower or "subscription" in msg_lower:
+            return "support_request"
+        if "service" in msg_lower or "what" in msg_lower or "how" in msg_lower:
+            return "general_info"
         return "unknown"
 
     def _rule_based_segment(self, intent: str) -> str:
@@ -30,15 +36,16 @@ class IntentService:
         # 1. Rule-based check
         rule_intent = self._rule_based_intent(message)
         rule_segment = self._rule_based_segment(rule_intent)
-        
+
         # 2. LLM check (if available)
         llm_intent = "unknown"
         llm_segment = "new_user"
-        
+
         if self.llm_client.provider != "mock":
             try:
                 llm_intent_raw = self.llm_client.detect_intent(message)
-                valid_intents = ["vip_question", "exchange_registration", "kol_collaboration", "support_request", "general_info"]
+                valid_intents = ["vip_question", "exchange_registration",
+                                 "kol_collaboration", "support_request", "general_info"]
                 for v in valid_intents:
                     if v in llm_intent_raw:
                         llm_intent = v
@@ -50,10 +57,11 @@ class IntentService:
         # 3. Decision logic: Check both, prioritize LLM if it's active and found a valid intent
         final_intent = rule_intent
         final_segment = rule_segment
-        
+
         if self.llm_client.provider != "mock" and llm_intent != "unknown":
             final_intent = llm_intent
             final_segment = llm_segment
-            
-        logger.info(f"Intent Check -> Rule: {rule_intent}, LLM: {llm_intent}, Final: {final_intent}")
+
+        logger.info(
+            f"Intent Check -> Rule: {rule_intent}, LLM: {llm_intent}, Final: {final_intent}")
         return final_intent, final_segment

@@ -4,6 +4,7 @@ from ..config import settings
 
 logger = logging.getLogger("ai_assistant")
 
+
 class LLMClient:
     def __init__(self):
         self.provider = self._determine_provider()
@@ -13,7 +14,7 @@ class LLMClient:
         # 1. Check if forced via .env
         if settings.LLM_PROVIDER != "auto":
             return settings.LLM_PROVIDER
-            
+
         # 2. Priority 1: API
         if settings.OPENAI_API_KEY or settings.ANTHROPIC_API_KEY:
             return "api"
@@ -56,7 +57,7 @@ class LLMClient:
             return response.choices[0].message.content
         except Exception as e:
             logger.error(f"API LLM Error: {e}")
-            return self._call_mock(prompt) # Fallback to mock on error
+            return self._call_mock(prompt)  # Fallback to mock on error
 
     def _call_local(self, prompt: str) -> str:
         try:
@@ -66,15 +67,20 @@ class LLMClient:
             return res.json().get("response", "")
         except Exception as e:
             logger.error(f"Local LLM Error: {e}")
-            return self._call_mock(prompt) # Fallback to mock on error
+            return self._call_mock(prompt)  # Fallback to mock on error
 
     def _call_mock(self, prompt: str) -> str:
         if "Classify the intent" in prompt:
             msg = prompt.split("Message:")[-1].strip().lower()
-            if "vip" in msg: return "vip_question"
-            if "exchange" in msg or "register" in msg: return "exchange_registration"
-            if "kol" in msg or "influencer" in msg: return "kol_collaboration"
-            if "support" in msg or "problem" in msg or "paid" in msg: return "support_request"
-            if "service" in msg or "what" in msg or "how" in msg: return "general_info"
+            if "vip" in msg:
+                return "vip_question"
+            if "exchange" in msg or "register" in msg:
+                return "exchange_registration"
+            if "kol" in msg or "influencer" in msg:
+                return "kol_collaboration"
+            if "support" in msg or "problem" in msg or "paid" in msg:
+                return "support_request"
+            if "service" in msg or "what" in msg or "how" in msg:
+                return "general_info"
             return "unknown"
         return "This is a mock response based on the provided context."

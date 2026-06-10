@@ -1,6 +1,6 @@
-# Rastad AI Assistant MVP
+# AI Assistant MVP
 
-Rastad AI Assistant is a FastAPI-based MVP for handling lead and support messages. It receives a user message, detects the user intent, assigns a simple segment, retrieves relevant context from a vector knowledge base, generates a reply, and stores the conversation history.
+AI Assistant is a FastAPI-based MVP for handling lead and support messages. It receives a user message, detects the user intent, assigns a simple segment, retrieves relevant context from a vector knowledge base, generates a reply, and stores the conversation history.
 
 The current product scope covers questions about VIP services, exchange registration, KOL collaboration, general service information, and support cases that should be handed over to a human.
 
@@ -100,8 +100,8 @@ http://localhost:8000/docs
 Build and run with Docker:
 
 ```bash
-docker build -t rastad-ai-assistant .
-docker run --env-file .env -p 8000:8000 rastad-ai-assistant
+docker build -t ai-assistant .
+docker run --env-file .env -p 8000:8000 ai-assistant
 ```
 
 Run with Docker Compose:
@@ -120,7 +120,20 @@ Run the basic endpoint tests:
 pytest
 ```
 
-The tests cover a successful `/message` request and validation for an empty message.
+If `pytest` is not available globally, run it through the local virtual environment:
+
+```bash
+.\.venv\Scripts\python.exe -m pytest
+```
+
+Current tests are in `tests/test_endpoints.py` and use FastAPI `TestClient`.
+
+Test coverage included:
+
+- `POST /message` with a valid message: verifies `200 OK`, detected intent, user segment, `needs_human_support`, and a non-empty reply.
+- `POST /message` with an empty message: verifies `400 Bad Request` and the validation error message.
+
+The test setup uses `LLM_PROVIDER=mock`, a temporary SQLite database, a temporary ChromaDB directory, and a stubbed knowledge-base search result. This keeps tests fast, isolated, and runnable without real API keys.
 
 ## Sample Requests and Responses
 

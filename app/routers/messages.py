@@ -9,6 +9,10 @@ from .. import models, schemas
 router = APIRouter()
 logger = logging.getLogger("ai_assistant")
 
+DEFAULT_REPLY = "سلام! پیام شما را دریافت کردم. لطفا کمی جزئیات بیشتر بفرمایید تا دقیق‌تر راهنمایی کنم."
+SUPPORT_REPLY = "متوجه شدم برای این موضوع به پشتیبانی نیاز دارید. لطفا جزئیات خطا، زمان رخداد و شماره پیگیری را ارسال کنید تا تیم پشتیبانی بررسی کند."
+TECHNICAL_ERROR_REPLY = "سلام! در حال حاضر برای پاسخ‌گویی با مشکل فنی روبه‌رو هستم. لطفا با پشتیبانی تماس بگیرید."
+
 
 @router.post("/message", response_model=schemas.MessageResponse)
 def process_message(req: schemas.MessageRequest, request: Request, db: Session = Depends(get_db)):
@@ -34,27 +38,29 @@ def process_message(req: schemas.MessageRequest, request: Request, db: Session =
         intent, segment = intent_service.process(req.message)
         needs_human = (intent == "support_request")
 
-        # 3. Knowledge Base Search (ChromaDB)
-        kb_context = kb_service.search(req.message)
-        if not kb_context:
-            logger.warning(
-                f"[{receive_time}] No suitable answer found in KB for user_id: {req.user_id}")
-            kb_context = "I couldn't find specific information about that. Would you like to connect with a human agent?"
-            needs_human = True
-
-        # 4. Generate Reply (with LLM Error handling)
-        try:
-            reply = llm_client.generate_reply(req.message, kb_context)
-            if not reply or not reply.strip():
+        # 3. Generate Reply
+        if needs_human:
+            reply = SUPPORT_REPLY
+        else:
+            kb_context = kb_service.search(req.message)
+            if not kb_context:
                 logger.warning(
-                    f"[{receive_time}] Empty LLM reply for user_id: {req.user_id}; using fallback reply")
-                reply = "سلام! پیام شما را دریافت کردم. لطفا کمی جزئیات بیشتر بفرمایید تا دقیق‌تر راهنمایی کنم."
+                    f"[{receive_time}] No suitable answer found in KB for user_id: {req.user_id}")
+                kb_context = "I couldn't find specific information about that. Would you like to connect with a human agent?"
                 needs_human = True
-        except Exception as e:
-            logger.error(
-                f"[{receive_time}] LLM/Mock error during reply generation for user_id: {req.user_id}: {e}")
-            reply = "سلام! در حال حاضر برای پاسخ‌گویی با مشکل فنی روبه‌رو هستم. لطفا با پشتیبانی تماس بگیرید."
-            needs_human = True
+
+            try:
+                reply = llm_client.generate_reply(req.message, kb_context)
+                if not reply or not reply.strip():
+                    logger.warning(
+                        f"[{receive_time}] Empty LLM reply for user_id: {req.user_id}; using fallback reply")
+                    reply = DEFAULT_REPLY
+                    needs_human = True
+            except Exception as e:
+                logger.error(
+                    f"[{receive_time}] LLM/Mock error during reply generation for user_id: {req.user_id}: {e}")
+                reply = TECHNICAL_ERROR_REPLY
+                needs_human = True
 
         # 5. Database Operations
         user = db.query(models.User).filter(

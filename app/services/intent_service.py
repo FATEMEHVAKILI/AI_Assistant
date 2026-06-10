@@ -76,11 +76,15 @@ class IntentService:
             except Exception as e:
                 logger.error(f"LLM intent detection failed: {e}")
 
-        # 3. Decision logic: Check both, prioritize LLM if it's active and found a valid intent
+        # 3. Decision logic: use LLM only when rules did not find a strong intent.
         final_intent = rule_intent
         final_segment = rule_segment
 
-        if self.llm_client.provider != "mock" and llm_intent != "unknown":
+        if (
+            self.llm_client.provider != "mock"
+            and llm_intent != "unknown"
+            and rule_intent in {"unknown", "general_info"}
+        ):
             final_intent = llm_intent
             final_segment = llm_segment
 

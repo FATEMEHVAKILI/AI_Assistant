@@ -1,7 +1,12 @@
-import chromadb
 import os
 import glob
 import logging
+
+os.environ.setdefault("ANONYMIZED_TELEMETRY", "False")
+os.environ.setdefault("CHROMA_TELEMETRY", "False")
+
+import chromadb
+from chromadb.config import Settings as ChromaSettings
 from ..config import settings
 
 logger = logging.getLogger("ai_assistant")
@@ -10,7 +15,14 @@ logger = logging.getLogger("ai_assistant")
 class KBService:
     def __init__(self):
         logger.info("Initializing ChromaDB and loading Knowledge Base...")
-        self.client = chromadb.PersistentClient(path=settings.CHROMA_DIR)
+        self.client = chromadb.PersistentClient(
+            path=settings.CHROMA_DIR,
+            settings=ChromaSettings(
+                anonymized_telemetry=False,
+                chroma_product_telemetry_impl="app.services.chroma_telemetry.NoopTelemetry",
+                chroma_telemetry_impl="app.services.chroma_telemetry.NoopTelemetry",
+            ),
+        )
         self.collection = self.client.get_or_create_collection(
             name="ai_assistant_kb")
         self._load_documents()

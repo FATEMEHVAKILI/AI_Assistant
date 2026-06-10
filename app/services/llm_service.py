@@ -112,7 +112,7 @@ Just return the intent name only."""
             )
             response = res.json().get("response", "")
             if not response or not response.strip():
-                logger.warning("Local LLM returned an empty response; using fallback reply.")
+                logger.debug("Local LLM returned an empty response; using fallback reply.")
                 return self._call_mock(prompt)
             return response
         except Exception as e:
@@ -123,6 +123,8 @@ Just return the intent name only."""
         """Strong mock with context awareness."""
         if "Classify the intent" in prompt:
             msg = prompt.lower()
+            if "message:" in msg:
+                msg = msg.split("message:", 1)[1].split("just return", 1)[0]
             if any(k in msg for k in ["vip", "وی آی پی", "خدمات vip"]):
                 return "vip_question"
             if any(k in msg for k in ["صرافی", "ثبت نام", "ثبت‌نام", "register", "exchange"]):

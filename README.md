@@ -13,7 +13,7 @@ The current product scope covers questions about VIP services, exchange registra
 - OpenAI SDK for real API mode
 - Ollama support for local LLM mode
 - Mock LLM fallback for running without API keys
-- Docker and Docker Compose
+- Optional Docker and Docker Compose files for containerized runs
 - Pytest and FastAPI TestClient
 
 ## Features
@@ -95,22 +95,24 @@ FastAPI documentation:
 http://localhost:8000/docs
 ```
 
-## Docker Run
+## Optional Docker Run
 
-Build and run with Docker:
+The main development workflow for this project is the local Python setup above. A `Dockerfile` and `docker-compose.yml` are included in case the app needs to be run in a container.
+
+If you want to build and run the image directly:
 
 ```bash
 docker build -t ai-assistant .
 docker run --env-file .env -p 8000:8000 ai-assistant
 ```
 
-Run with Docker Compose:
+Or run the same service with Docker Compose:
 
 ```bash
 docker compose up --build
 ```
 
-The compose file mounts `logs/` and `chroma_db/` so logs and vector data can persist between container runs.
+The compose file builds the local `Dockerfile`, exposes the API on port `8000`, reads environment variables from `.env`, and mounts `logs/` and `chroma_db/` so generated logs and vector data can persist between container runs.
 
 ## Tests
 
@@ -320,7 +322,7 @@ Current limitations:
 - SQLite is suitable for MVP/local use, not high-scale production traffic.
 - Mock responses are deterministic and less natural than a real LLM.
 
-If there were more time, I would improve:
+Possible next improvements:
 
 - more accurate `needs_human_support` detection with confidence scoring
 - richer architecture documentation and sequence diagrams
@@ -331,22 +333,13 @@ If there were more time, I would improve:
 - separate production configuration for PostgreSQL and managed Vector DB
 - full Anthropic/Claude provider implementation
 
-## Submission Checklist
+## Quick Start Reference
 
-- GitHub link or ZIP file: submit the project repository or a ZIP of this folder.
-- README file: this file.
-- `.env.example`: included with safe placeholder values only.
-- Run command:
+For a fresh local run:
 
 ```bash
 pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
-- Docker command:
-
-```bash
-docker compose up --build
-```
-
-- Sample requests/responses: included above.
+The project includes `.env.example` with safe placeholder values, plus sample requests and responses above for the main assistant flows. Docker files are available for optional containerized runs, but the local Python commands are the expected way to run the project right now.
